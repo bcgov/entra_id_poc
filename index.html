@@ -5,24 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OIDC Single Page App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/oidc-client-ts/2.0.2/browser/oidc-client-ts.min.js"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            color: #0078d4;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+        }
+
+        button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #005a9e;
+        }
+
+        pre {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap; /* Wraps long JSON data */
+            word-wrap: break-word;
+            overflow: auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .buttons {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-<h1>Welcome to OIDC Single Page App</h1>
-<button id="login">Login</button>
-<button id="logout">Logout</button>
-<h2>User Info:</h2>
-<pre id="user-info"></pre>
-<h2>ID Token:</h2>
-<pre id="id-token"></pre>
-<!--<h2>Access Token:</h2>-->
-<!--<pre id="access-token"></pre>-->
+<div class="container">
+    <h1>Welcome</h1>
+    <div class="buttons">
+        <button id="login">Login</button>
+        <button id="logout">Logout</button>
+    </div>
+    <h2>User Info:</h2>
+    <pre id="user-info">Not logged in</pre>
+    <h2>ID Token:</h2>
+    <pre id="id-token">Not logged in</pre>
+</div>
 
 <script>
     const config = {
         authority: "https://login.microsoftonline.com/84bfb766-5669-48b7-996e-3e8c44143a36",
-        client_id: "ca4bd38f-920a-4956-af58-8e5d3e0ea050", // Replace with your Client ID
-        redirect_uri: window.location.origin + "/entra_id_poc/", // Redirect back to the same page
-        // redirect_uri: window.location.origin + "/EntraIdJavascript/index.html", // Redirect back to the same page
+        client_id: "ca4bd38f-920a-4956-af58-8e5d3e0ea050",
+        // redirect_uri: window.location.origin + "/EntraIdJavascript/index.html",
+        redirect_uri: window.location.origin + "/entra_id_poc/",
         response_type: "code",
         scope: "openid profile email",
         post_logout_redirect_uri: window.location.origin
@@ -35,7 +98,6 @@
         console.log("User logged in:", user);
         displayUserInfo(user);
     }).catch(error => {
-        // No redirect callback in URL
         console.log("Not a callback or error:", error);
     });
 
@@ -61,6 +123,7 @@
             displayUserInfo(user);
         } else {
             document.getElementById('user-info').textContent = "User not logged in.";
+            document.getElementById('id-token').textContent = "User not logged in.";
         }
     });
 
@@ -71,11 +134,6 @@
         // Decode and display ID token as JSON
         const decodedIdToken = parseJwt(user.id_token);
         document.getElementById('id-token').textContent = JSON.stringify(decodedIdToken, null, 2);
-
-        // Decode and display access token as JSON
-        // NOTE: Entra ID is returning opaque access tokens. We cannot parse them.
-        // const decodedAccessToken = parseJwt(user.access_token);
-        // document.getElementById('access-token').textContent = decodedAccessToken;
     }
 
     function parseJwt(token) {
